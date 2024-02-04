@@ -1,0 +1,48 @@
+---
+title: "schhabr1"
+author: "sharon"
+date: "2024-02-02"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+a<- read.csv("new_york_listings_2024.csv")
+```
+
+```{r}
+summary(a)
+```
+
+#Transforming Bedroom variable as factors
+```{r}
+a$bedrooms <-as.factor(a$bedrooms)
+str(a)
+```
+
+
+```{r}
+library(ggplot2)
+library(esquisse)
+```
+
+
+```{r}
+#esquisser()
+
+library(ggplot2)
+
+ggplot(a) +
+ aes(x = minimum_nights, y = price) +
+ geom_area() +
+ theme_minimal()
+```
+
+```{r}
+
+```
+
