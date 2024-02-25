@@ -1,0 +1,83 @@
+---
+title: "Assignment 2"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-02-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ISLR)
+library(caret)
+library(gmodels)
+```
+
+```{r}
+norm_model <- preProcess(Default, method = c('range'))
+Default_normalized <- predict(norm_model,Default)
+summary(Default_normalized)
+```
+
+```{r}
+set.seed(123)
+model <- train(default~balance+income, data = Default_normalized, method="knn")
+model
+```
+
+```{r}
+set.seed(123)
+search_grid <- expand.grid(k=c(2,7,9,15))
+model <- train(default~balance+income,data = Default_normalized,
+               method="knn",tuneGrid=search_grid)
+```
+
+```{r}
+library(class)
+Default_normalized <- Default_normalized[-2]
+Index_Train <- createDataPartition(Default_normalized$default,p=0.8, list = FALSE)
+Train <- Default_normalized[Index_Train,]
+Test <- Default_normalized[-Index_Train,]
+```
+
+```{r}
+Train_predictors <- Train[,2:3]
+Test_predictors <- Test[,2:3]
+Train_labels <- Train[,1]
+Test_labels <- Test[,1]
+predicted_Test_labels <- knn(Train_predictors,
+                             Test_predictors,
+                             cl=Train_labels,
+                             k=4)
+head(predicted_Test_labels)
+```
+
+```{r}
+CrossTable(x=Test_labels,y=predicted_Test_labels,prop.chisq = FALSE)
+```
+
+```{r}
+predicted_Test_labels <- knn(Train_predictors,
+                             Test_predictors,
+                             cl=Train_labels,k=100,prob = TRUE)
+class_prob <- attr(predicted_Test_labels,'prob')
+head(class_prob)
+```
+
+```{r}
+library(caret)
+conf_matrix <- confusionMatrix(data = factor(predicted_Test_labels, levels = levels(Test_labels)), reference = factor(Test_labels, levels = levels(Test_labels)))
+print(conf_matrix)
+```
+
+```{r}
+library('pROC')
+rocobj <- plot.roc(aSAH$outcome, aSAH$s100b, main= "Confidence intervals", percent = TRUE,ci = TRUE,print.auc = TRUE)
+ciobj <- ci.se(rocobj,specifities = seq(0, 100, 5))
+plot(ciobj, type = "shape", col = "pink")
+plot(ci(rocobj, of = "thresholds", thresholds="best"))
+plot
+```
