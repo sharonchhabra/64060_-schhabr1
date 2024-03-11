@@ -1,0 +1,131 @@
+---
+title: "schhabr1-FML-assignment4"
+author: "sharon"
+date: "2024-03-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(class) 
+library(caret)
+```
+```{r}
+library(readr) 
+library(e1071) 
+library(reshape2) 
+library(dplyr)
+```
+```{r}
+library(stats) 
+library(ISLR)
+library(gmodels)
+```
+#Loading the data
+```{r}
+UniversalBank <- read.csv("/Users/sharonchhabra/Downloads/UniversalBank.csv")
+
+```
+```{r}
+head(UniversalBank)
+```
+#Replacing the actual column names with a little more appropriate and shorter ones
+```{r}
+colnames(UniversalBank) <- c("id","Age","Experience","Income","ZIP.code","Family","CCAvg","Education","M ortage","Personal.Loan","Securities.Account","CD.Account","Online","CreditCar d")
+summary(UniversalBank)
+```
+#Formatting
+```{r}
+format(UniversalBank)
+```
+
+```{r}
+UniversalBank<- UniversalBank 
+head(UniversalBank)
+```
+#Changing Column names
+```{r}
+colnames(UniversalBank)[1]="id" 
+colnames(UniversalBank)[2]="Experience"
+colnames(UniversalBank)[3]="Age" 
+colnames(UniversalBank)[4]="Income levels" 
+colnames(UniversalBank)[5]="ZIP" 
+colnames(UniversalBank)[6]="Family size" 
+colnames(UniversalBank)[7]="CCAvg" 
+colnames(UniversalBank)[8]="loan" 
+colnames(UniversalBank)[9]="online" 
+colnames(UniversalBank)[10]="CC" 
+t(t(names(UniversalBank)))
+```
+#Considering only the required variables: col 8: loan, col 9: online, col 10: CC
+```{r}
+UniversalBank<-UniversalBank[,c(8,9,10)] 
+t(t(names(UniversalBank)))
+```
+In the code shown below we are partitioning the data into Training (60%) and validation (40%) sets.
+```{r}
+set.seed(2539)
+Train.ind <- createDataPartition(UniversalBank$loan,p=0.6,list=FALSE)
+```
+60% reserved for training
+```{r}
+ Train.universalbank1 <- UniversalBank[Train.ind,] 
+Valid.universalbank1 <- UniversalBank[-Train.ind,]
+```
+```{r}
+attach(Train.universalbank1)
+```
+```{r}
+ftable(CC, loan, online)
+```
+#Question B - what is the probability that customer who owns a bank credit cardand is actively using online banking service will accept the loan offer? #From the above table, There are 485+46 = 531 records where online = 1 andCC=1 and 46 of them are without loan, so the conditional probability is 46/531 = 0.08662
+```{r}
+P0<-46/531
+```
+#Question C: -Create two separate pivot tables for the training data. One will haveLoan (rows) as a function of Online (columns) and the other will have Loan (rows) as a function of CC
+#Pivot table for laon (rows) as a function of online (columns)
+```{r}
+attach(Train.universalbank1)
+
+addmargins(table(loan,online))
+```
+#Pivot table for Loan (rows) as a function of CC (columns)
+```{r}
+attach(Train.universalbank1)
+addmargins(table(loan, CC))
+```
+#Question D-.P(CC = 1 | Loan = 1) (the proportion of credit card holders amongthe loan acceptors)
+```{r}
+P1<- 84/288
+```
+```{r}
+
+P2<- 173/288
+```
+```{r}
+P3<- 288/3000
+```
+```{r}
+P4<- 798/2712
+```
+```{r}
+P5<- 1603/2712
+```
+```{r}
+P6<- 2712/3000
+```
+```{r}
+UB <- naiveBayes(loan~., data = Train.universalbank1)
+UB
+```
+```{r}
+pred.prob <- predict(UB, newdata = Train.universalbank1, type = "raw")
+predicted <- cbind(Train.universalbank1, pred.prob)
+head(predicted, 100)
+```
+
+
